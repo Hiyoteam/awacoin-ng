@@ -1,0 +1,2 @@
+# awacoin-ng
+Next awacoin.
