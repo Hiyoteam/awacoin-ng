@@ -43,6 +43,7 @@ class AWCNGClient:
             try:
                 request = requests.get(self.server+path[1:] if self.server.endswith("/") else self.server+path,
                                         params=params if params else None)
+                break
             except:
                 pass
         if request.status_code == 500:
