@@ -36,5 +36,8 @@ while 1:
             result=internal_miner(mission.salt, mission.chunk_difficult, mission.problem)
         print("Submit result:",mission.finish(result))
         print("Current balance:",client.balance)
+    except KeyboardInterrupt:
+        print("Byebye")
+        exit(0)
     except BaseException as e:
         print(f"Failed mining, ignoring: {e}")
