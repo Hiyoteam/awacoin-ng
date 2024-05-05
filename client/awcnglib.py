@@ -39,8 +39,12 @@ class AWCNGClient:
         if not self.validate_keypair():
             raise ValueError("Invaild keypair")
     def _request(self, path, params={}, process_errors=True) -> dict:
-        request = requests.get(self.server+path[1:] if self.server.endswith("/") else self.server+path,
-                                params=params if params else None)
+        for _ in range(5):
+            try:
+                request = requests.get(self.server+path[1:] if self.server.endswith("/") else self.server+path,
+                                        params=params if params else None)
+            except:
+                pass
         if request.status_code == 500:
             raise RequestError("Server internal error")
         if request.json()["status"] != 200 and process_errors:
