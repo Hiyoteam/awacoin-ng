@@ -30,11 +30,11 @@ while 1:
         if miner == "binary":
             cmdline=f"./miner-cpp-binary {mission.salt} {mission.chunk_difficult} {mission.problem.upper()}"
             print(f"> {cmdline}")
-            result=popen(cmdline).read()
+            result=popen(cmdline).read().strip(" ").strip("\n")
             print(f"< {result}")
         else:
             result=internal_miner(mission.salt, mission.chunk_difficult, mission.problem)
         print("Submit result:",mission.finish(result))
         print("Current balance:",client.balance)
-    except:
-        print("Failed mining, ignoring.")
+    except BaseException as e:
+        print(f"Failed mining, ignoring: {e}")
