@@ -1,0 +1,4 @@
+fastapi==0.110.3
+rich==13.7.1
+orjson==3.10.3
+requests==2.31.0
