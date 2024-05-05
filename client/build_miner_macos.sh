@@ -1,0 +1,1 @@
+/opt/homebrew/bin/g++-13 ./client/cpp-miner.cpp -lcrypto -lgmp -O2 -o miner -L/opt/homebrew/Cellar/openssl@3/3.3.0/lib -I /opt/homebrew/include -L/opt/homebrew/Cellar/gmp/6.3.0/lib

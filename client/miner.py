@@ -1,5 +1,5 @@
 from awcnglib import AWCNGClient, internal_miner
-from os import path
+from os import path, popen
 SERVER="https://awcng.awa.ac.cn"
 if not path.exists(".awcng_wallet"):
     client=AWCNGClient(SERVER)
@@ -15,9 +15,26 @@ else:
 print(f"Logged in as {client.public_key}@{client.server}")
 print(f"Start mining.")
 print("Diff:",client.chunk_difficult)
+miner=""
+if path.exists("miner-cpp-binary"):
+    print("Using C++ Miner")
+    miner="binary"
+else:
+    print("Using internal miner")
+    miner="internal"
 while 1:
-    print("Requesting mission...")
-    mission=client.create_pow_mission()
-    print("OK!")
-    print("Submit result:",mission.finish(internal_miner(mission.salt, mission.chunk_difficult, mission.problem)))
-    print("Current balance:",client.balance)
+    try:
+        print("Requesting mission...")
+        mission=client.create_pow_mission()
+        print("OK!")
+        if miner == "binary":
+            cmdline=f"./miner-cpp-binary {mission.salt} {mission.chunk_difficult} {mission.problem.upper()}"
+            print(f"> {cmdline}")
+            result=popen(cmdline).read()
+            print(f"< {result}")
+        else:
+            result=internal_miner(mission.salt, mission.chunk_difficult, mission.problem)
+        print("Submit result:",mission.finish(result))
+        print("Current balance:",client.balance)
+    except:
+        print("Failed mining, ignoring.")
