@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from awc_core import MinePool, Wallet
 from rich import print
 from os import path, mkdir, listdir
+from fastapi.middleware.cors import CORSMiddleware
 
 def issecure(*strings):
     for string in strings:
@@ -147,3 +148,9 @@ async def transaction(public_key: str, private_key: str, target_wallet: str, amo
     with open("./datas/wallets/"+target_wallet+".json", "wb+") as f:
         f.write(orjson.dumps(data))
     return {"status": 200}
+
+app.add_middleware(CORSMiddleware,
+    allow_origins="*",
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"])
