@@ -1,5 +1,5 @@
 # awacoin-ng
-Next awacoin.
+Next [awacoin](https://github.com/Hiyoteam/awacoin).
 
 Disclaimer: awacoin-ng is **purely recreational** **centralized virtual currency** and is not linked to **any** real currency. Please **DO NOT USE FOR COMMERCIAL USE**.
 
