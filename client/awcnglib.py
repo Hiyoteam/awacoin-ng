@@ -2,6 +2,8 @@ import requests
 import hashlib
 from typing import Optional
 
+CLIENT_VERSION = 1
+
 class RequestError(Exception):
     pass
 
@@ -29,8 +31,10 @@ class AWCPoWMineMission:
         })
 
 class AWCNGClient:
-    def __init__(self, server: str, public_key: Optional[str] = None, private_key: Optional[str] = None) -> None:
+    def __init__(self, server: str, public_key: Optional[str] = None, private_key: Optional[str] = None, debug: bool = False) -> None:
         self.server=server
+        self.debug = debug
+        self._request_cache = {}
         self.ping()
         if not public_key or not private_key:
             self.create_keypair()
@@ -38,14 +42,28 @@ class AWCNGClient:
             self.public_key, self.private_key = public_key, private_key
         if not self.validate_keypair():
             raise ValueError("Invaild keypair")
-    def _request(self, path, params={}, process_errors=True) -> dict:
-        for _ in range(5):
-            try:
-                request = requests.get(self.server+path[1:] if self.server.endswith("/") else self.server+path,
-                                        params=params if params else None)
-                break
-            except:
-                pass
+        server_version=self.server_info()["server_version"]
+        if server_version != CLIENT_VERSION:
+            raise ConnectionError(f"The client is for AWC-NG Version {CLIENT_VERSION}, but the server version is {server_version}. Try upgrading your awcnglib.")
+    def _request(self, path, params={}, process_errors=True, cache=False) -> dict:
+        if cache and f"{path}@{params}" in self._request_cache.keys():
+            print(f"awcngclient._request: (cache hit) requesting {path} with params {params}")
+            request:requests.Response=self._request_cache[f"{path}@{params}"]
+        else:
+            for _ in range(5):
+                if self.debug:
+                    print(f"awcngclient._request: requesting {path} with params {params}")
+                try:
+                    request:requests.Response = requests.get(self.server+path[1:] if self.server.endswith("/") else self.server+path,
+                                            params=params if params else None)
+                    break
+                except KeyboardInterrupt as e:
+                    raise e
+                except:
+                    pass
+            if cache:
+                print(f"awcngclient._request: (cache miss) updating cache for {path}")
+                self._request_cache[f"{path}@{params}"]=request
         if request.status_code == 500:
             raise RequestError("Server internal error")
         if request.json()["status"] != 200 and process_errors:
@@ -89,7 +107,7 @@ class AWCNGClient:
         })
     
     def server_info(self):
-        return self._request("/info")
+        return self._request("/info", cache=True)
     
     @property
     def chunk_reward(self):
@@ -113,7 +131,8 @@ class AWCNGClient:
 
 
 if __name__ == "__main__":
-    client=AWCNGClient("https://awcng.awa.ac.cn")
+    print("Connecting...")
+    client=AWCNGClient("https://awcng.awa.ac.cn", debug=True)
     print(f"Connected to {client.public_key}@{client.server} ({client.coin_short_name})!")
     print(f"Trying to mine a(n) {client.coin_short_name}...")
     print("Diff:",client.chunk_difficult)
